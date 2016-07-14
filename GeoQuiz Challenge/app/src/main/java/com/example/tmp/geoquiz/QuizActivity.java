@@ -17,6 +17,7 @@ public class QuizActivity extends AppCompatActivity {
     private Button mTrueButton;
     private Button mFalseButton;
     private Button mNextButton;
+    private Button mPrevButton;
     private TextView mQuestionTextView;
 
     private Question[] mQuestionBank = new Question[]{
@@ -33,6 +34,10 @@ public class QuizActivity extends AppCompatActivity {
     private void updateQuestion(){
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
+        if (mCurrentIndex == 0) {mPrevButton.setEnabled(false);}
+        else {mPrevButton.setEnabled(true);}
+        if ((mCurrentIndex + 1) == mQuestionBank.length){mNextButton.setEnabled(false);}
+        else {mNextButton.setEnabled(true);}
     }
 
     private void checkAnswer(boolean userPressedTrue){
@@ -54,6 +59,7 @@ public class QuizActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
 
+
         mQuestionTextView = (TextView)findViewById(R.id.question_text_view);
 
         mTrueButton = (Button) findViewById(R.id.true_button);
@@ -73,6 +79,16 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
+        mPrevButton = (Button)findViewById(R.id.prev_button);
+        mPrevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
+                updateQuestion();
+            }
+        });
+
         mNextButton = (Button)findViewById(R.id.next_button);
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,6 +98,8 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
+
+
         mQuestionTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,6 +107,8 @@ public class QuizActivity extends AppCompatActivity {
                 updateQuestion();
             }
         });
+
+
 
         updateQuestion();
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
