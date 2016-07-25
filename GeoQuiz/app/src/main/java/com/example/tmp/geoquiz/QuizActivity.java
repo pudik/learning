@@ -1,5 +1,6 @@
 package com.example.tmp.geoquiz;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -18,6 +19,7 @@ public class QuizActivity extends AppCompatActivity {
 
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private Button mTrueButton;
     private Button mFalseButton;
@@ -34,6 +36,7 @@ public class QuizActivity extends AppCompatActivity {
     };
 
     private int mCurrentIndex = 0;
+    private boolean mIsCheater;
     private int n = 0;
 
     private void updateQuestion(){
@@ -46,13 +49,18 @@ public class QuizActivity extends AppCompatActivity {
 
         int messageResID = 0;
 
-        if (userPressedTrue == answerIsTrue) {
-            messageResID = R.string.correct_toast;
+        if (mIsCheater){
+            messageResID = R.string.judgment_toast;
         } else {
-            messageResID = R.string.incorrect_toast;
-        }
 
+            if (userPressedTrue == answerIsTrue) {
+                messageResID = R.string.correct_toast;
+            } else {
+                messageResID = R.string.incorrect_toast;
+            }
+        }
         Toast.makeText(this, messageResID, Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
@@ -63,7 +71,7 @@ public class QuizActivity extends AppCompatActivity {
 
         mQuestionTextView = (TextView)findViewById(R.id.question_text_view);
 
-        mTrueButton = (Button) findViewById(R.id.true_button);
+        mTrueButton = (Button)findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -71,12 +79,11 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
-        mFalseButton = (Button) findViewById(R.id.false_button);
+        mFalseButton = (Button)findViewById(R.id.false_button);
         mFalseButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 checkAnswer(false);
-
             }
         });
 
@@ -85,6 +92,7 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                mIsCheater = false;
                 updateQuestion();
             }
         });
@@ -92,11 +100,13 @@ public class QuizActivity extends AppCompatActivity {
         mCheatButton = (Button)findViewById(R.id.cheat_button);
         mCheatButton.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View view) {
-                Intent i = new Intent(QuizActivity.this, CheatActivity.class);
-                startActivity(i);
+            public void onClick(View v) {
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent i = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                startActivityForResult(i,REQUEST_CODE_CHEAT);
             }
         });
+
 
         if (savedInstanceState != null){
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
@@ -116,6 +126,22 @@ public class QuizActivity extends AppCompatActivity {
 //        }
 //        );
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK){
+            return;
+        }
+
+        if (requestCode == REQUEST_CODE_CHEAT) {
+            if (data == null) {
+                return;
+            }
+            mIsCheater = CheatActivity.wasAnswerShown(data);
+        }
+
+    }
+
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
         super.onSaveInstanceState(savedInstanceState);
