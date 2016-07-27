@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -15,6 +16,10 @@ public class CheatActivity extends AppCompatActivity {
 
     public static final String EXTRA_ANSWER_IS_TRUE = "com.example.tmp.geoquiz.answer_is_true";
     public static final String EXTRA_ANSWER_SHOWN = "com.example.tmp.geoquiz.answer_shown";
+
+    private static final String KEY_INDEX = "index";
+
+    private boolean mCheated;
     private boolean mAnswerIsTrue;
 
     private TextView mAnswerTextView;
@@ -49,12 +54,14 @@ public class CheatActivity extends AppCompatActivity {
                     mAnswerTextView.setText(R.string.false_button);
                 }
                 setAnswerShownResult(true);
+                mCheated = true;
             }
         });
 
-
-
-
+        if (savedInstanceState != null){
+            mCheated = savedInstanceState.getBoolean(KEY_INDEX);
+            if (mCheated) {setAnswerShownResult(true);}
+        }
         /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);*/
         /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -73,6 +80,10 @@ public class CheatActivity extends AppCompatActivity {
         setResult(RESULT_OK,data);
     }
 
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putBoolean(KEY_INDEX, mCheated);
+    }
 
 
 }
